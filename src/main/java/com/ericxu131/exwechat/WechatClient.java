@@ -1,13 +1,24 @@
 package com.ericxu131.exwechat;
 
+import com.ericxu131.exwechat.model.AccessToken;
 import com.ericxu131.exwechat.model.WechatMessageResult;
+import com.ericxu131.exwechat.model.WechatUser;
 import com.ericxu131.exwechat.utils.WechatUtils;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import static com.google.gson.stream.JsonToken.BOOLEAN;
+import static com.google.gson.stream.JsonToken.NULL;
+import static com.google.gson.stream.JsonToken.NUMBER;
+import com.google.gson.stream.JsonWriter;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,21 +33,24 @@ public class WechatClient {
 
     private static final Logger logger = LoggerFactory.getLogger(WechatClient.class);
     private final String appid, secret;
-    private String accessToken;
-    private Long accessTokenCreateTime;
-    private int accessTokenExpiresIn = 0;
+
+    private static Map<String, AccessToken> tokenMap = new HashMap<String, AccessToken>();
+    private final Gson gson;
 
     public WechatClient(String appid, String secret) {
         this.appid = appid;
         this.secret = secret;
+        gson = new GsonBuilder()
+                .registerTypeAdapter(Boolean.class, booleanAsIntAdapter)
+                .registerTypeAdapter(boolean.class, booleanAsIntAdapter)
+                .create();
     }
 
-    private String getAccessToken() {
-        if (accessToken == null || new Date().getTime() > (accessTokenCreateTime + accessTokenExpiresIn)) {
-            accessTokenCreateTime = new Date().getTime();
-            Map result = WechatUtils.getAccessToken(appid, secret);
-            accessToken = (String) result.get("access_token");
-            accessTokenExpiresIn = ((Double) result.get("expires_in")).intValue();
+    private synchronized AccessToken getAccessToken() {
+        AccessToken accessToken = tokenMap.get(appid);
+        Long now = new Date().getTime();
+        if (accessToken == null || now > accessToken.getExpiresTimestemp()) {
+            accessToken = WechatUtils.getAccessToken(appid, secret);
         }
         return accessToken;
     }
@@ -46,13 +60,28 @@ public class WechatClient {
         Client client = Client.create(config);
         WebResource webResource = client.resource("https://api.weixin.qq.com/cgi-bin/message/custom/send");
         ClientResponse clientResponse = webResource
-                .queryParam("access_token", getAccessToken())
+                .queryParam("access_token", getAccessToken().getToken())
                 .post(ClientResponse.class, new Gson().toJson(new MassageBuilder("text").toUser(toUser).textContent(message).bulid()));
 
         if (clientResponse.getStatus() != 200) {
             throw new IllegalStateException("status error:" + clientResponse.getStatus());
         } else {
             return new Gson().fromJson(clientResponse.getEntity(String.class), WechatMessageResult.class);
+        }
+    }
+
+    public WechatUser getUserInfo(String openid) {
+        ClientConfig config = new DefaultClientConfig();
+        Client client = Client.create(config);
+        WebResource webResource = client.resource("https://api.weixin.qq.com/cgi-bin/user/info");
+        ClientResponse clientResponse = webResource
+                .queryParam("access_token", getAccessToken().getToken())
+                .queryParam("openid", openid)
+                .get(ClientResponse.class);
+        if (clientResponse.getStatus() != 200) {
+            throw new IllegalStateException("status error:" + clientResponse.getStatus());
+        } else {
+            return gson.fromJson(clientResponse.getEntity(String.class), WechatUser.class);
         }
     }
 
@@ -85,5 +114,32 @@ public class WechatClient {
         }
 
     }
+    private static final TypeAdapter<Boolean> booleanAsIntAdapter = new TypeAdapter<Boolean>() {
+        @Override
+        public void write(JsonWriter out, Boolean value) throws IOException {
+            if (value == null) {
+                out.nullValue();
+            } else {
+                out.value(value);
+            }
+        }
 
+        @Override
+        public Boolean read(JsonReader in) throws IOException {
+            JsonToken peek = in.peek();
+            switch (peek) {
+                case BOOLEAN:
+                    return in.nextBoolean();
+                case NULL:
+                    in.nextNull();
+                    return null;
+                case NUMBER:
+                    return in.nextInt() != 0;
+                case STRING:
+                    return Boolean.parseBoolean(in.nextString());
+                default:
+                    throw new IllegalStateException("Expected BOOLEAN or NUMBER but was " + peek);
+            }
+        }
+    };
 }

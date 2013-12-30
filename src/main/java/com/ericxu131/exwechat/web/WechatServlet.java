@@ -82,6 +82,9 @@ public abstract class WechatServlet extends HttpServlet {
             StringWriter stringWriter = new StringWriter();
             IOUtils.copy(request.getInputStream(), stringWriter, "UTF-8");
             String xml = stringWriter.toString();
+            if (StringUtils.isEmpty(xml)) {
+                return null;
+            }
             SimpleMessage message = JAXBUtils.parserString(xml, SimpleMessage.class);
             return JAXBUtils.parserString(xml, message.getMsgType().getMessageClass());
         } catch (IOException ex) {

@@ -1,5 +1,6 @@
 package com.ericxu131.exwechat.utils;
 
+import com.ericxu131.exwechat.model.AccessToken;
 import com.google.gson.Gson;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -39,7 +40,7 @@ public class WechatUtils {
         return result;
     }
 
-    public static Map getAccessToken(String appid, String secret) {
+    public static AccessToken getAccessToken(String appid, String secret) {
         ClientConfig config = new DefaultClientConfig();
         Client client = Client.create(config);
         WebResource cosmsservice = client.resource("https://api.weixin.qq.com/cgi-bin/token");
@@ -52,7 +53,8 @@ public class WechatUtils {
         if (clientResponse.getStatus() != 200) {
             throw new IllegalStateException("status error:" + clientResponse.getStatus());
         } else {
-            return new Gson().fromJson(clientResponse.getEntity(String.class), Map.class);
+            Map result = new Gson().fromJson(clientResponse.getEntity(String.class), Map.class);
+            return new AccessToken((String) result.get("access_token"), ((Double) result.get("expires_in")).longValue());
         }
     }
 }

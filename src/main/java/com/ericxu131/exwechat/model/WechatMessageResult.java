@@ -13,7 +13,7 @@ public class WechatMessageResult {
     @SerializedName("errcode")
     private String errorCode;
     @Expose
-    @SerializedName("errorMessage")
+    @SerializedName("errmsg")
     private String errorMessage;
 
     public boolean isSuccess() {
@@ -52,6 +52,11 @@ public class WechatMessageResult {
      */
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    @Override
+    public String toString() {
+        return "WechatMessageResult{" + "errorCode=" + errorCode + ", errorMessage=" + errorMessage + '}';
     }
 
 }
