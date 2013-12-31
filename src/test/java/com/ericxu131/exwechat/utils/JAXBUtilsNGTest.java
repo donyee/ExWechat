@@ -1,6 +1,6 @@
 package com.ericxu131.exwechat.utils;
 
-import java.util.Map;
+import com.ericxu131.exwechat.model.message.TextMessage;
 import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -12,9 +12,9 @@ import org.testng.annotations.Test;
  *
  * @author eric
  */
-public class WechatUtilsNGTest {
+public class JAXBUtilsNGTest {
 
-    public WechatUtilsNGTest() {
+    public JAXBUtilsNGTest() {
     }
 
     @BeforeClass
@@ -34,14 +34,10 @@ public class WechatUtilsNGTest {
     }
 
     @Test
-    public void testSign() {
-        WechatUtils.sign("edsf213", "123213", "tiklearn");
-        assertTrue(true);
-    }
-
-    @Test
-    public void testGetAccessToken() {
-        
+    public void testObjectToXml() {
+        TextMessage textMessage = new TextMessage();
+        textMessage.setContent("xxx");
+        assertEquals("<xml><Content>xxx</Content></xml>", JAXBUtils.objectToXml(textMessage, TextMessage.class));
     }
 
 }

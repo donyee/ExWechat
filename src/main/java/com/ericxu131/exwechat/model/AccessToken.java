@@ -22,4 +22,30 @@ public class AccessToken {
         return expiresTimestemp;
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final AccessToken other = (AccessToken) obj;
+        if ((this.token == null) ? (other.token != null) : !this.token.equals(other.token)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "AccessToken{" + "token=" + token + ", expiresTimestemp=" + expiresTimestemp + '}';
+    }
+
 }

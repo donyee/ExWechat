@@ -2,6 +2,7 @@ package com.ericxu131.exwechat.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
+import java.io.StringWriter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -28,9 +29,11 @@ public class JAXBUtils {
         try {
             JAXBContext jc = JAXBContext.newInstance(c);
             Marshaller m = jc.createMarshaller();
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            m.marshal(object, output);
-            return output.toString();
+            StringWriter writer = new StringWriter();
+            writer.append("");
+            m.setProperty(Marshaller.JAXB_FRAGMENT, true);
+            m.marshal(object, writer);
+            return writer.toString();
         } catch (JAXBException ex) {
             throw new IllegalStateException(ex);
         }
