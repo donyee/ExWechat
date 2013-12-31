@@ -1,5 +1,6 @@
 package com.ericxu131.exwechat.web;
 
+import com.ericxu131.exwechat.model.event.SimpleEvent;
 import com.ericxu131.exwechat.model.message.Message;
 import com.ericxu131.exwechat.model.message.SimpleMessage;
 import com.ericxu131.exwechat.utils.JAXBUtils;
@@ -63,7 +64,17 @@ public abstract class WechatServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Message message = parserMessage(request);
+        String xml;
+        try {
+            StringWriter stringWriter = new StringWriter();
+            IOUtils.copy(request.getInputStream(), stringWriter, "UTF-8");
+            xml = stringWriter.toString();
+        } catch (IOException ex) {
+            throw new IllegalStateException(ex);
+        }
+
+        logger.debug("xml in {}", xml);
+        Message message = parserMessage(xml);
         if (message != null) {
             Message responseMessage = onMessage(message);
             if (responseMessage != null) {
@@ -77,18 +88,25 @@ public abstract class WechatServlet extends HttpServlet {
         }
     }
 
-    private Message parserMessage(HttpServletRequest request) {
-        try {
-            StringWriter stringWriter = new StringWriter();
-            IOUtils.copy(request.getInputStream(), stringWriter, "UTF-8");
-            String xml = stringWriter.toString();
-            if (StringUtils.isEmpty(xml)) {
+    private Message parserMessage(String xml) {
+        if (StringUtils.isEmpty(xml)) {
+            return null;
+        }
+        SimpleMessage message = JAXBUtils.parserString(xml, SimpleMessage.class);
+        if (message.getMsgType().getMessageClass() == null) {
+            return null;
+        }
+        Message m = JAXBUtils.parserString(xml, message.getMsgType().getMessageClass());
+
+        if (m instanceof SimpleEvent) {
+            SimpleEvent smimpleEvent = (SimpleEvent) m;
+            if (smimpleEvent.getEvent().getEventClass() == null) {
                 return null;
             }
-            SimpleMessage message = JAXBUtils.parserString(xml, SimpleMessage.class);
-            return JAXBUtils.parserString(xml, message.getMsgType().getMessageClass());
-        } catch (IOException ex) {
-            throw new IllegalStateException(ex);
+            return JAXBUtils.parserString(xml, smimpleEvent.getEvent().getEventClass());
+        } else {
+            return m;
         }
+
     }
 }
