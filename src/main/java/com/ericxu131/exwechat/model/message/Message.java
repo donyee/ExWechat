@@ -1,5 +1,6 @@
 package com.ericxu131.exwechat.model.message;
 
+import java.util.Date;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -18,9 +19,13 @@ public abstract class Message {
     @XmlElement(name = "CreateTime")
     private String createTime;
     @XmlElement(name = "MsgType")
-    private MessageType msgType;
+    protected MessageType msgType;
     @XmlElement(name = "MsgId")
     private String msgId;
+
+    public Message() {
+        createTime = new Date().getTime() + "";
+    }
 
     public String getToUserName() {
         return toUserName;

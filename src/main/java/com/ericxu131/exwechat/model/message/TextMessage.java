@@ -13,6 +13,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TextMessage extends Message {
 
+    public TextMessage() {
+        super();
+        msgType = MessageType.TEXT;
+    }
+
     @XmlElement(name = "Content")
     private String content;
 

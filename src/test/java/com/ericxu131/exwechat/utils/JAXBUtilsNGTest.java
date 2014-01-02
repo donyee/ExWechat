@@ -37,7 +37,8 @@ public class JAXBUtilsNGTest {
     public void testObjectToXml() {
         TextMessage textMessage = new TextMessage();
         textMessage.setContent("xxx");
-        assertEquals("<xml><Content>xxx</Content></xml>", JAXBUtils.objectToXml(textMessage, TextMessage.class));
+        textMessage.setCreateTime("123456");
+        assertEquals("<xml><CreateTime>123456</CreateTime><MsgType>text</MsgType><Content>xxx</Content></xml>", JAXBUtils.objectToXml(textMessage, TextMessage.class));
     }
 
 }
