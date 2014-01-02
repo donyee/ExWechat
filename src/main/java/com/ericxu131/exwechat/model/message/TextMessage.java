@@ -24,4 +24,9 @@ public class TextMessage extends Message {
         this.content = content;
     }
 
+    @Override
+    public String toString() {
+        return "TextMessage{" + "content=" + content + '}';
+    }
+
 }

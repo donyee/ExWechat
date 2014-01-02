@@ -73,14 +73,18 @@ public abstract class WechatServlet extends HttpServlet {
             throw new IllegalStateException(ex);
         }
 
-        logger.debug("xml in {}", xml);
+        logger.debug("request xml {}", xml);
         Message message = parserMessage(xml);
         if (message != null) {
+            logger.debug("request message {}", message.toString());
             Message responseMessage = onMessage(message);
             if (responseMessage != null) {
+                logger.debug("response message {}", responseMessage.toString());
                 PrintWriter writer = response.getWriter();
                 try {
-                    writer.print(JAXBUtils.objectToXml(responseMessage, responseMessage.getClass()));
+                    String responseXML = JAXBUtils.objectToXml(responseMessage, responseMessage.getClass());
+                    logger.debug("response xml {}", responseXML);
+                    writer.print(responseXML);
                 } finally {
                     writer.close();
                 }

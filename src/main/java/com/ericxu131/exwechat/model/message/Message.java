@@ -62,4 +62,9 @@ public abstract class Message {
         this.msgId = msgId;
     }
 
+    @Override
+    public String toString() {
+        return "Message{" + "toUserName=" + toUserName + ", fromUserName=" + fromUserName + ", createTime=" + createTime + ", msgType=" + msgType + ", msgId=" + msgId + '}';
+    }
+
 }

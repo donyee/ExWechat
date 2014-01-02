@@ -40,9 +40,6 @@ public class WechatClientNGTest {
 
     @Test
     public void test() {
-        WechatUser wechatUser = new WechatClient("wxaf1578e09211f853", "8aae2799c892416c634e6f225cace6da").getUserInfo("oP6wCuHYQV2u1pLdRnD4XwpfQ6_4");
-        System.out.println(wechatUser);
-        assertNotNull(wechatUser);
     }
 
 }
