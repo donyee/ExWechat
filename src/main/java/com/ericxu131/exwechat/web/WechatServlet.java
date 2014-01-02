@@ -97,7 +97,7 @@ public abstract class WechatServlet extends HttpServlet {
             return null;
         }
         SimpleMessage message = JAXBUtils.parserString(xml, SimpleMessage.class);
-        if (message.getMsgType().getMessageClass() == null) {
+        if (message.getMsgType() == null || message.getMsgType().getMessageClass() == null) {
             return null;
         }
         Message m = JAXBUtils.parserString(xml, message.getMsgType().getMessageClass());

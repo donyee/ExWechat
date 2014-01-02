@@ -13,7 +13,9 @@ public enum MessageType {
     @XmlEnumValue("text")
     TEXT,
     @XmlEnumValue("event")
-    EVENT;
+    EVENT,
+    @XmlEnumValue("voice")
+    VOICE;
 
     public Class getMessageClass() {
         if (TEXT == this) {

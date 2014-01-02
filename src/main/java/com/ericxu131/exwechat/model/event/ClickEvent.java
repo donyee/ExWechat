@@ -24,4 +24,9 @@ public class ClickEvent extends Event {
         this.eventKey = eventKey;
     }
 
+    @Override
+    public String toString() {
+        return "ClickEvent{" + "eventKey=" + eventKey + '}';
+    }
+
 }
