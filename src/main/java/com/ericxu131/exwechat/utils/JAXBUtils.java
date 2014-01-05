@@ -1,8 +1,10 @@
 package com.ericxu131.exwechat.utils;
 
-import java.io.ByteArrayOutputStream;
+import com.sun.xml.bind.marshaller.CharacterEscapeHandler;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -28,10 +30,18 @@ public class JAXBUtils {
     public static String objectToXml(Object object, Class c) {
         try {
             JAXBContext jc = JAXBContext.newInstance(c);
+            System.out.println(jc.getClass());
             Marshaller m = jc.createMarshaller();
             StringWriter writer = new StringWriter();
             writer.append("");
             m.setProperty(Marshaller.JAXB_FRAGMENT, true);
+            m.setProperty(CharacterEscapeHandler.class.getName(), new CharacterEscapeHandler() {
+                public void escape(char[] ac, int i, int j, boolean flag,
+                        Writer writer) throws IOException {
+                    writer.write(ac, i, j);
+                }
+            });
+
             m.marshal(object, writer);
             return writer.toString();
         } catch (JAXBException ex) {

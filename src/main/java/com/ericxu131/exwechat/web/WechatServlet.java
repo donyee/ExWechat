@@ -1,8 +1,10 @@
 package com.ericxu131.exwechat.web;
 
+import com.ericxu131.exwechat.WechatContext;
 import com.ericxu131.exwechat.model.event.SimpleEvent;
 import com.ericxu131.exwechat.model.message.Message;
 import com.ericxu131.exwechat.model.message.SimpleMessage;
+import com.ericxu131.exwechat.model.message.TextMessage;
 import com.ericxu131.exwechat.utils.JAXBUtils;
 import com.ericxu131.exwechat.utils.WechatUtils;
 import java.io.IOException;
@@ -64,6 +66,8 @@ public abstract class WechatServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        WechatContext.getCurrentInstance().setRequest(request);
         String xml;
         try {
             StringWriter stringWriter = new StringWriter();
@@ -82,6 +86,7 @@ public abstract class WechatServlet extends HttpServlet {
                 logger.debug("response message {}", responseMessage.toString());
                 PrintWriter writer = response.getWriter();
                 try {
+                    logger.debug("response Message class {}", responseMessage.getClass());
                     String responseXML = JAXBUtils.objectToXml(responseMessage, responseMessage.getClass());
                     logger.debug("response xml {}", responseXML);
                     writer.print(responseXML);
@@ -111,6 +116,12 @@ public abstract class WechatServlet extends HttpServlet {
         } else {
             return m;
         }
+    }
 
+    protected TextMessage replyTextMessage(Message message) {
+        TextMessage responseTextMessage = new TextMessage();
+        responseTextMessage.setFromUserName(message.getToUserName());
+        responseTextMessage.setToUserName(message.getFromUserName());
+        return responseTextMessage;
     }
 }
