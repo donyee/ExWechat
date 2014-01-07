@@ -41,10 +41,6 @@ public class WechatClientNGTest {
 
     @Test
     public void test() {
-        WechatClient wechatClient = new WechatClient("wxaf1578e09211f853", "8aae2799c892416c634e6f225cace6da");
-        WechatQRCode code = wechatClient.qrCodeCreate(90, QRCodeCreateActionName.QR_SCENE, "test2", 10);
-        System.out.println(code.getTicket());
-        System.out.println(code.getExpireSeconds());
     }
 
 }
