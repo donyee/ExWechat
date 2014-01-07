@@ -1,5 +1,6 @@
 package com.ericxu131.exwechat.utils;
 
+import com.ericxu131.exwechat.WechatAccessException;
 import com.ericxu131.exwechat.model.AccessToken;
 import com.google.gson.Gson;
 import com.sun.jersey.api.client.Client;
@@ -54,7 +55,13 @@ public class WechatUtils {
             throw new IllegalStateException("status error:" + clientResponse.getStatus());
         } else {
             Map result = new Gson().fromJson(clientResponse.getEntity(String.class), Map.class);
-            return new AccessToken((String) result.get("access_token"), ((Double) result.get("expires_in")).longValue());
+
+            if (result.get("errcode") != null) {
+                throw new WechatAccessException(result.get("errcode") + "", result.get("errmsg") + "");
+            } else {
+                return new AccessToken((String) result.get("access_token"), ((Double) result.get("expires_in")).longValue());
+            }
+
         }
     }
 }

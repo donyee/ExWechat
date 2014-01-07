@@ -2,6 +2,7 @@ package com.ericxu131.exwechat;
 
 import com.ericxu131.exwechat.model.AccessToken;
 import com.ericxu131.exwechat.model.WechatMessageResult;
+import com.ericxu131.exwechat.model.WechatQRCode;
 import com.ericxu131.exwechat.model.WechatUser;
 import com.ericxu131.exwechat.utils.WechatUtils;
 import com.google.gson.Gson;
@@ -70,6 +71,33 @@ public class WechatClient {
         }
     }
 
+    public WechatQRCode qrCodeCreate(Integer expireSeconds, QRCodeCreateActionName actionName, String actionInfo, int sceneId) {
+        if (QRCodeCreateActionName.QR_SCENE == actionName) {
+            if (expireSeconds == null || expireSeconds < 1 || expireSeconds > 1800) {
+                throw new IllegalArgumentException("expireSeconds must between 1 to 1800");
+            }
+        }
+
+        if (sceneId < 1 || sceneId > 100000) {
+            throw new IllegalArgumentException("sceneId must between 1 to 100000");
+        }
+
+        ClientConfig config = new DefaultClientConfig();
+        Client client = Client.create(config);
+        WebResource webResource = client.resource("https://api.weixin.qq.com/cgi-bin/qrcode/create");
+        ClientResponse clientResponse;
+        clientResponse = webResource
+                .queryParam("access_token", getAccessToken().getToken())
+                .post(ClientResponse.class, new Gson().toJson(new QRCodeBuilder(actionName).expireSeconds(expireSeconds).actionInfo(actionInfo).sceneId(sceneId).bulid()));
+        if (clientResponse.getStatus() != 200) {
+            throw new IllegalStateException("status error:" + clientResponse.getStatus());
+        } else {
+            return gson.fromJson(clientResponse.getEntity(String.class), WechatQRCode.class);
+        }
+        //{"ticket":"gQG28DoAAAAAAAAAASxodHRwOi8vd2VpeGluLnFxLmNvbS9xL0FuWC1DNmZuVEhvMVp4NDNMRnNRAAIEesLvUQMECAcAAA==","expire_seconds":1800}
+        //{"errcode":40013,"errmsg":"invalid appid"}
+    }
+
     public WechatUser getUserInfo(String openid) {
         ClientConfig config = new DefaultClientConfig();
         Client client = Client.create(config);
@@ -85,7 +113,38 @@ public class WechatClient {
         }
     }
 
-    public class MassageBuilder {
+    private static class QRCodeBuilder {
+
+        private final Map qrCode = new HashMap();
+
+        public QRCodeBuilder(QRCodeCreateActionName actionName) {
+            qrCode.put("action_name", actionName.getValue());
+        }
+
+        private QRCodeBuilder expireSeconds(Integer expireSeconds) {
+            if (expireSeconds != null) {
+                qrCode.put("expire_seconds", expireSeconds);
+            }
+            return this;
+        }
+
+        private QRCodeBuilder actionInfo(String actionInfo) {
+            qrCode.put("action_info", actionInfo);
+            return this;
+        }
+
+        private QRCodeBuilder sceneId(int sceneId) {
+            qrCode.put("scene_id", sceneId);
+            return this;
+        }
+
+        private Map bulid() {
+            return qrCode;
+        }
+
+    }
+
+    public static class MassageBuilder {
 
         private final Map message = new HashMap();
 
@@ -142,4 +201,5 @@ public class WechatClient {
             }
         }
     };
+
 }

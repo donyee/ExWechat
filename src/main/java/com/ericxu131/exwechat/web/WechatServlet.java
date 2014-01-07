@@ -109,7 +109,7 @@ public abstract class WechatServlet extends HttpServlet {
 
         if (m instanceof SimpleEvent) {
             SimpleEvent smimpleEvent = (SimpleEvent) m;
-            if (smimpleEvent.getEvent().getEventClass() == null) {
+            if (smimpleEvent.getEvent() == null || smimpleEvent.getEvent().getEventClass() == null) {
                 return null;
             }
             return JAXBUtils.parserString(xml, smimpleEvent.getEvent().getEventClass());

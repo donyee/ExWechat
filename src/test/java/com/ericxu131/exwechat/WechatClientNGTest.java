@@ -1,5 +1,6 @@
 package com.ericxu131.exwechat;
 
+import com.ericxu131.exwechat.model.WechatQRCode;
 import com.ericxu131.exwechat.model.WechatUser;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -40,6 +41,10 @@ public class WechatClientNGTest {
 
     @Test
     public void test() {
+        WechatClient wechatClient = new WechatClient("wxaf1578e09211f853", "8aae2799c892416c634e6f225cace6da");
+        WechatQRCode code = wechatClient.qrCodeCreate(90, QRCodeCreateActionName.QR_SCENE, "test2", 10);
+        System.out.println(code.getTicket());
+        System.out.println(code.getExpireSeconds());
     }
 
 }

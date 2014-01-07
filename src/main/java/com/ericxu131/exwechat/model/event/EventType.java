@@ -15,7 +15,9 @@ public enum EventType {
     @XmlEnumValue("unsubscribe")
     UNSUBSCRIBE,
     @XmlEnumValue("LOCATION")
-    LOCATION;
+    LOCATION,
+    @XmlEnumValue("SCAN")
+    SCAN;
 
     public Class getEventClass() {
         if (this == CLICK) {
